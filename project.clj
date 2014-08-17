@@ -18,5 +18,5 @@
               :compiler {
                 :output-to "sporktrum.js"
                 :output-dir "out"
-                :optimizations :none
+                :optimizations :advanced
                 :source-map true}}]})
