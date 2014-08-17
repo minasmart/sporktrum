@@ -1,0 +1,16 @@
+<html>
+    <body>
+        <script>
+            navigator.getUserMedia = (navigator.getUserMedia ||
+                navigator.webkitGetUserMedia ||
+                navigator.mozGetUserMedia ||
+                navigator.msGetUserMedia);
+        </script>
+        <script src="out/goog/base.js" type="text/javascript"></script>
+        <script src="dsp.js" type="text/javascript"></script>
+        <script src="sporktrum.js" type="text/javascript"></script>
+        <script type="text/javascript">goog.require("sporktrum.core");</script>
+        <canvas id="spectrum" width="800" height="100"
+            style="border: #a0a0a0 solid 1px;"></canvas>
+    </body>
+</html>
