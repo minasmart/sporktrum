@@ -1,10 +1,12 @@
-(ns sporktrum.core)
+(ns sporktrum.core (:require [sporktrum.util :as u]))
+
 
 (enable-console-print!)
 
 (def canvas-dom (.getElementById js/document "spectrum"))
 (def width (.-width canvas-dom))
 (def height (.-height canvas-dom))
+(def spectrum-baseline (- height 20))
 (def ctx (.getContext canvas-dom "2d"))
 (def gradient (.createLinearGradient ctx 0 height 0 0))
 (.addColorStop gradient 0 "#8ED6FF")
@@ -12,6 +14,31 @@
 (set! (.-font ctx) "16px Helvetica, Arial")
 (set! (.-strokeStyle ctx) "#8A8A8A")
 
+; All notes are referenced in steps from A4
+(def C1 -21)
+(def C2 -21)
+(def C6 27)
+(def C7 39)
+(def C8 41)
+
+(def lower-bound-note C2)
+(def upper-bound-note C6)
+(def steps (- upper-bound-note lower-bound-note))
+
+(def flat "\u266D")
+(def sharp "\u266F")
+(def scale [ "A"
+             (str "B" flat)
+             "B"
+             "C"
+             (str "C" sharp)
+             "D"
+             (str "E" flat)
+             "E"
+             "F"
+             (str "F" sharp)
+             "G"
+             (str "A" flat) ])
 
 (def constraints (js-obj "video" false "audio" true))
 
@@ -21,59 +48,103 @@
 ; Storage for things that get GCed unless you hang on to them.
 (def refs (atom {}))
 
-(defn to-non-typed-array
-  "Convert a typed array to an array"
-  [typed-array]
-  (.apply js/Array [] typed-array))
+(defn draw-spectrum
+  "Draw the spectrogram"
+  [freq-mags]
 
-(defn freq-for-bin
-  "Get the corresponding frequency for a bin in the fft"
-  [bin-index]
-  (* bin-index (/ (:sample-rate @refs) (:fft-size @refs))))
+  ; reset and start
+  (set! (.-fillStyle ctx) gradient)
+  (.beginPath ctx)
+  (.moveTo ctx 0 spectrum-baseline)
+
+  (let [lower-freq (u/freq-for-step lower-bound-note)
+        upper-freq (u/freq-for-step upper-bound-note)
+        freqs (:freqs @refs)
+        arr-freqs (apply array freqs)
+        lower-idx (.indexOf freqs (apply min-key #(Math/abs (- lower-freq %)) freqs))
+        upper-idx (.indexOf freqs (apply min-key #(Math/abs (- upper-freq %)) freqs))
+        partitioned-freqs (drop lower-idx (take (inc upper-idx) freq-mags))]
+    (doall (map-indexed
+             (fn [idx data]
+               (let [note (u/steps-from-A4 (:freq data))
+                     x (* (/ (- note lower-bound-note) steps) width)
+                     y (- spectrum-baseline (* (/ (:mag data) 255) spectrum-baseline))]
+                 (.lineTo ctx x y))) partitioned-freqs)))
+
+  (.lineTo ctx width spectrum-baseline)
+  (.fill ctx))
+
+(defn print-scale
+  "Print the scale accross the bottom"
+  []
+
+  (set! (.-strokeStyle ctx) "#8A8A8A")
+  (.beginPath ctx)
+  (.moveTo ctx 0 spectrum-baseline)
+  (.lineTo ctx width spectrum-baseline)
+  (.stroke ctx)
+
+  (set! (.-fillStyle ctx) "#8A8A8A")
+  (set! (.-textAlign ctx) "center")
+  (set! (.-font ctx) "10px Helvetica, Arial")
+
+  (let [semi-tones (range lower-bound-note upper-bound-note)
+        octave #(+ 4 (Math/floor (/ % 12)))
+        notes (map #(if (>= % 0)
+                      (str (nth (cycle scale) %) (octave %))
+                      (str (nth (cycle (reverse scale)) (Math/abs %)) (octave %)))
+                   semi-tones)]
+    (doall (map-indexed (fn [idx note]
+                          (.fillText ctx note (* (/ idx steps) width) (- height 6)))
+                        notes))
+    ))
+
+(defn draw-line-scale
+  "Draw a line up every 4th note"
+  []
+  (set! (.-strokeStyle ctx) "#8A8A8A")
+  (doall (map #(let [x (* (/ % 48) width)]
+                  (.beginPath ctx)
+                  (.moveTo ctx x 0)
+                  (.lineTo ctx x spectrum-baseline)
+                  (.stroke ctx))
+              (drop 1 (take-nth 4 (range 0 steps)))))
+  )
+
+;(defn print-strongest-freq
+;  "Print the strongest frequency in the top right corner of the graph"
+;  [freq-data]
+;  (let [highest-mag (apply max (take upper-idx simple-freq-data))
+;        idx (.indexOf simple-freq-data highest-mag)
+;        freq (u/freq-for-bin idx (:sample-rate @refs) (:fft-size @refs))]
+;    (set! (.-fillStyle ctx) "#8A8A8A")
+;    (.fillText ctx (str (js/parseInt freq 10) "Hz") (- width 70) 20)))
+
+(defn clear
+  "Clear the canvas"
+  []
+  (set! (.-fillStyle ctx) "black")
+  (.fillRect ctx 0 0 width height))
 
 (defn draw
   "Draw the spectrum"
   []
   (js/requestAnimationFrame draw)
   (let [analyser (:analyser @refs)
-        freq-data (:freq-data @refs)
-        upper-idx (:upper-idx @refs)
-        line-x (* (/ (:line-idx @refs) upper-idx) width)]
+        uint8-freq-data (:freq-data @refs)]
+    (.getByteFrequencyData analyser uint8-freq-data)
+    (let [freq-data (u/to-non-typed-array uint8-freq-data)
+          freq-mags (map-indexed
+                      (fn [idx freq] {:freq freq :mag (nth freq-data idx) })
+                      (:freqs @refs))]
+      (clear)
+      (draw-spectrum freq-mags)
+      (draw-line-scale)
+      (print-scale)
+      ;(print-strongest-freq freq-data freq-mags)
+      )))
 
-    (.getByteFrequencyData analyser freq-data)
-    (set! (.-fillStyle ctx) "black")
-    (.fillRect ctx 0 0 width height)
-
-    (.beginPath ctx)
-    (.moveTo ctx line-x 0)
-    (.lineTo ctx line-x height)
-    (.stroke ctx)
-
-    (set! (.-fillStyle ctx) gradient)
-    (let [simple-freq-data (to-non-typed-array freq-data)
-          len (count simple-freq-data)]
-
-      ; reset and start
-      (.beginPath ctx)
-      (.moveTo ctx 0 height)
-
-      (dotimes [idx upper-idx]
-        (let [mag (get simple-freq-data idx)
-              x (* (/ idx upper-idx) width)
-              y (- height (* (/ mag 255) height))]
-          (.lineTo ctx x y)))
-
-      (.lineTo ctx width height)
-      (.fill ctx)
-
-      (let [highest-mag (apply max (take upper-idx simple-freq-data))
-            idx (.indexOf simple-freq-data highest-mag)
-            freq (freq-for-bin idx)]
-        (set! (.-fillStyle ctx) "#8A8A8A")
-        (.fillText ctx (str (js/parseInt freq 10) "Hz") (- width 70) 20)
-        ))))
-
-(defn stream-fn
+(defn configure
   "User media stream callback"
   [stream]
   (let [context (js/AudioContext.)
@@ -82,8 +153,8 @@
 
     ; set the fft size
     (set! (.-fftSize analyser) 2048)
-    (set! (.-minDecibels analyser) -100)
-    (set! (.-maxDecibels analyser) -20)
+    (set! (.-minDecibels analyser) -85)
+    (set! (.-maxDecibels analyser) -25)
     (set! (.-smoothingTimeConstant analyser) 0.9)
 
     ; connect the analyser
@@ -98,13 +169,10 @@
     (swap! refs assoc :freq-bin-count (.-frequencyBinCount analyser))
     (swap! refs assoc :freq-data (js/Uint8Array. (:freq-bin-count @refs)))
 
-    (let [freqs (map #(freq-for-bin %) (range 0 (:freq-bin-count @refs)))
-          arr-freqs (apply array freqs)
-          closest-to-cap (apply min-key #(Math/abs (- 5000 %)) freqs)
-          closest-to-voice (apply min-key #(Math/abs (- 200 %)) freqs)]
-      (swap! refs assoc :upper-idx (.indexOf arr-freqs closest-to-cap))
-      (swap! refs assoc :line-idx (.indexOf arr-freqs closest-to-voice))
-      )
+    (swap! refs assoc :freqs
+           (apply array
+                  (map #(u/freq-for-bin % (:sample-rate @refs) (:fft-size @refs))
+                       (range 0 (:freq-bin-count @refs)))))
 
     (js/requestAnimationFrame draw)))
 
@@ -113,4 +181,4 @@
   [err]
   (println err))
 
-(.getUserMedia js/navigator constraints stream-fn err-callback)
+(.getUserMedia js/navigator constraints configure err-callback)
