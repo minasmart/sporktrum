@@ -4,6 +4,26 @@ goog.require('cljs.core');
 goog.require('sporktrum.util');
 goog.require('sporktrum.util');
 cljs.core.enable_console_print_BANG_.call(null);
+navigator.getUserMedia = (function (){var or__3553__auto__ = navigator.getUserMedia;if(cljs.core.truth_(or__3553__auto__))
+{return or__3553__auto__;
+} else
+{var or__3553__auto____$1 = navigator.webkitGetUserMedia;if(cljs.core.truth_(or__3553__auto____$1))
+{return or__3553__auto____$1;
+} else
+{var or__3553__auto____$2 = navigator.mozGetUserMedia;if(cljs.core.truth_(or__3553__auto____$2))
+{return or__3553__auto____$2;
+} else
+{return navigator.msGetUserMedia;
+}
+}
+}
+})();
+window.AudioContext = (function (){var or__3553__auto__ = window.AudioContext;if(cljs.core.truth_(or__3553__auto__))
+{return or__3553__auto__;
+} else
+{return window.webkitAudioContext;
+}
+})();
 sporktrum.core.canvas_dom = document.getElementById("spectrum");
 sporktrum.core.width = sporktrum.core.canvas_dom.width;
 sporktrum.core.height = sporktrum.core.canvas_dom.height;

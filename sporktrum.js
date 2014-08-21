@@ -16328,6 +16328,22 @@ sporktrum.util.freq_for_step = function(a) {
 };
 sporktrum.core = {};
 cljs.core.enable_console_print_BANG_.call(null);
+navigator.getUserMedia = function() {
+  var a = navigator.getUserMedia;
+  if (cljs.core.truth_(a)) {
+    return a;
+  }
+  a = navigator.webkitGetUserMedia;
+  if (cljs.core.truth_(a)) {
+    return a;
+  }
+  a = navigator.mozGetUserMedia;
+  return cljs.core.truth_(a) ? a : navigator.msGetUserMedia;
+}();
+window.AudioContext = function() {
+  var a = window.AudioContext;
+  return cljs.core.truth_(a) ? a : window.webkitAudioContext;
+}();
 sporktrum.core.canvas_dom = document.getElementById("spectrum");
 sporktrum.core.width = sporktrum.core.canvas_dom.width;
 sporktrum.core.height = sporktrum.core.canvas_dom.height;
