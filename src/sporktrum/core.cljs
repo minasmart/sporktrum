@@ -1,7 +1,16 @@
 (ns sporktrum.core (:require [sporktrum.util :as u]))
 
-
 (enable-console-print!)
+
+(set! (.-getUserMedia js/navigator)
+      (or (.-getUserMedia js/navigator)
+          (.-webkitGetUserMedia js/navigator)
+          (.-mozGetUserMedia js/navigator)
+          (.-msGetUserMedia js/navigator)))
+
+(set! (.-AudioContext js/window)
+      (or (.-AudioContext js/window)
+          (.-webkitAudioContext js/window)))
 
 (def canvas-dom (.getElementById js/document "spectrum"))
 (def width (.-width canvas-dom))
