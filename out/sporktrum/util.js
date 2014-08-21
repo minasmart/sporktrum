@@ -23,5 +23,3 @@ sporktrum.util.steps_from_A4 = (function steps_from_A4(freq){return (((12) * Mat
 */
 sporktrum.util.freq_for_step = (function freq_for_step(steps){return (sporktrum.util.A4 * Math.pow.call(null,(2),(steps / (12))));
 });
-
-//# sourceMappingURL=util.js.map
