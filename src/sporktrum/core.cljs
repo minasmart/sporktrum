@@ -83,6 +83,28 @@
   (.lineTo ctx width spectrum-baseline)
   (.fill ctx))
 
+(defn print-strongest-freq
+  "Print the strongest frequency in the top right corner of the graph"
+  [freq-mags]
+  (let [max-freq (:freq (apply max-key #(:mag %) freq-mags))
+        floated-steps (u/steps-from-A4 max-freq)
+        steps (int floated-steps)
+        octave (+ 4 (Math/floor (/ steps 12)))
+        cents (int (* (- floated-steps steps) 100))
+        signed-cents (if (>= cents 0)
+                       (str "+" cents)
+                       (str cents))
+        note (if (>= steps 0)
+                (nth (cycle scale) steps)
+                (nth (cycle (reverse scale)) (Math/abs steps)))]
+    (set! (.-fillStyle ctx) "#8A8A8A")
+    (set! (.-textAlign ctx) "right")
+    (set! (.-font ctx) "14px Helvetica, Arial")
+    (.fillText ctx (str (js/parseInt max-freq 10) "Hz") (- width 20) 20)
+    (.fillText ctx (str note octave) (- width 20) 40)
+    (.fillText ctx (str signed-cents " cents") (- width 20) 60)
+    ))
+
 (defn print-scale
   "Print the scale accross the bottom"
   []
@@ -120,15 +142,6 @@
               (drop 1 (take-nth 4 (range 0 steps)))))
   )
 
-;(defn print-strongest-freq
-;  "Print the strongest frequency in the top right corner of the graph"
-;  [freq-data]
-;  (let [highest-mag (apply max (take upper-idx simple-freq-data))
-;        idx (.indexOf simple-freq-data highest-mag)
-;        freq (u/freq-for-bin idx (:sample-rate @refs) (:fft-size @refs))]
-;    (set! (.-fillStyle ctx) "#8A8A8A")
-;    (.fillText ctx (str (js/parseInt freq 10) "Hz") (- width 70) 20)))
-
 (defn clear
   "Clear the canvas"
   []
@@ -150,7 +163,7 @@
       (draw-spectrum freq-mags)
       (draw-line-scale)
       (print-scale)
-      ;(print-strongest-freq freq-data freq-mags)
+      (print-strongest-freq freq-mags)
       )))
 
 (defn configure
