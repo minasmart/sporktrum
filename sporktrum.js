@@ -16402,9 +16402,9 @@ sporktrum.core.print_strongest_freq = function(a) {
   sporktrum.core.ctx.fillStyle = "#8A8A8A";
   sporktrum.core.ctx.textAlign = "right";
   sporktrum.core.ctx.font = "14px Helvetica, Arial";
-  sporktrum.core.ctx.fillText("" + cljs.core.str.cljs$core$IFn$_invoke$arity$1(parseInt(a, 10)) + "Hz", sporktrum.core.width - 20, 20);
-  sporktrum.core.ctx.fillText("" + cljs.core.str.cljs$core$IFn$_invoke$arity$1(c) + cljs.core.str.cljs$core$IFn$_invoke$arity$1(d), sporktrum.core.width - 20, 40);
-  return sporktrum.core.ctx.fillText("" + cljs.core.str.cljs$core$IFn$_invoke$arity$1(b) + " cents", sporktrum.core.width - 20, 60);
+  sporktrum.core.ctx.fillText("" + cljs.core.str.cljs$core$IFn$_invoke$arity$1(parseInt(a, 10)) + "Hz", sporktrum.core.width - 10, 20);
+  sporktrum.core.ctx.fillText("" + cljs.core.str.cljs$core$IFn$_invoke$arity$1(c) + cljs.core.str.cljs$core$IFn$_invoke$arity$1(d), sporktrum.core.width - 10, 40);
+  return sporktrum.core.ctx.fillText("" + cljs.core.str.cljs$core$IFn$_invoke$arity$1(b) + " cents", sporktrum.core.width - 10, 60);
 };
 sporktrum.core.print_scale = function() {
   sporktrum.core.ctx.strokeStyle = "#8A8A8A";
