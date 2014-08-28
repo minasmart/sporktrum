@@ -7057,27 +7057,27 @@ cljs.core.not_empty = function(a) {
   return cljs.core.seq.call(null, a) ? a : null;
 };
 cljs.core.nil_iter = function nil_iter() {
-  "undefined" === typeof cljs.core.t5444 && (cljs.core.t5444 = function(b, c) {
+  "undefined" === typeof cljs.core.t5445 && (cljs.core.t5445 = function(b, c) {
     this.nil_iter = b;
-    this.meta5445 = c;
+    this.meta5446 = c;
     this.cljs$lang$protocol_mask$partition1$ = 0;
     this.cljs$lang$protocol_mask$partition0$ = 393216;
-  }, cljs.core.t5444.cljs$lang$type = !0, cljs.core.t5444.cljs$lang$ctorStr = "cljs.core/t5444", cljs.core.t5444.cljs$lang$ctorPrWriter = function(b, c, d) {
-    return cljs.core._write.call(null, c, "cljs.core/t5444");
-  }, cljs.core.t5444.prototype.hasNext = function() {
+  }, cljs.core.t5445.cljs$lang$type = !0, cljs.core.t5445.cljs$lang$ctorStr = "cljs.core/t5445", cljs.core.t5445.cljs$lang$ctorPrWriter = function(b, c, d) {
+    return cljs.core._write.call(null, c, "cljs.core/t5445");
+  }, cljs.core.t5445.prototype.hasNext = function() {
     return!1;
-  }, cljs.core.t5444.prototype.next = function() {
+  }, cljs.core.t5445.prototype.next = function() {
     return Error("No such element");
-  }, cljs.core.t5444.prototype.remove = function() {
+  }, cljs.core.t5445.prototype.remove = function() {
     return Error("Unsupported operation");
-  }, cljs.core.t5444.prototype.cljs$core$IMeta$_meta$arity$1 = function(b) {
-    return this.meta5445;
-  }, cljs.core.t5444.prototype.cljs$core$IWithMeta$_with_meta$arity$2 = function(b, c) {
-    return new cljs.core.t5444(this.nil_iter, c);
-  }, cljs.core.__GT_t5444 = function(b, c) {
-    return new cljs.core.t5444(b, c);
+  }, cljs.core.t5445.prototype.cljs$core$IMeta$_meta$arity$1 = function(b) {
+    return this.meta5446;
+  }, cljs.core.t5445.prototype.cljs$core$IWithMeta$_with_meta$arity$2 = function(b, c) {
+    return new cljs.core.t5445(this.nil_iter, c);
+  }, cljs.core.__GT_t5445 = function(b, c) {
+    return new cljs.core.t5445(b, c);
   });
-  return new cljs.core.t5444(nil_iter, null);
+  return new cljs.core.t5445(nil_iter, null);
 };
 cljs.core.StringIter = function(a, b) {
   this.s = a;
@@ -16394,6 +16394,18 @@ sporktrum.core.draw_spectrum = function(a) {
   sporktrum.core.ctx.lineTo(sporktrum.core.width, sporktrum.core.spectrum_baseline);
   return sporktrum.core.ctx.fill();
 };
+sporktrum.core.print_strongest_freq = function(a) {
+  a = (new cljs.core.Keyword(null, "freq", "freq", -1855845278)).cljs$core$IFn$_invoke$arity$1(cljs.core.apply.call(null, cljs.core.max_key, function(a) {
+    return(new cljs.core.Keyword(null, "mag", "mag", 48619174)).cljs$core$IFn$_invoke$arity$1(a);
+  }, a));
+  var b = sporktrum.util.steps_from_A4.call(null, a), c = b | 0, d = 4 + Math.floor.call(null, c / 12), b = 100 * (b - c) | 0, b = 0 <= b ? "+" + cljs.core.str.cljs$core$IFn$_invoke$arity$1(b) : "" + cljs.core.str.cljs$core$IFn$_invoke$arity$1(b), c = 0 <= c ? cljs.core.nth.call(null, cljs.core.cycle.call(null, sporktrum.core.scale), c) : cljs.core.nth.call(null, cljs.core.cycle.call(null, cljs.core.reverse.call(null, sporktrum.core.scale)), Math.abs.call(null, c));
+  sporktrum.core.ctx.fillStyle = "#8A8A8A";
+  sporktrum.core.ctx.textAlign = "right";
+  sporktrum.core.ctx.font = "14px Helvetica, Arial";
+  sporktrum.core.ctx.fillText("" + cljs.core.str.cljs$core$IFn$_invoke$arity$1(parseInt(a, 10)) + "Hz", sporktrum.core.width - 20, 20);
+  sporktrum.core.ctx.fillText("" + cljs.core.str.cljs$core$IFn$_invoke$arity$1(c) + cljs.core.str.cljs$core$IFn$_invoke$arity$1(d), sporktrum.core.width - 20, 40);
+  return sporktrum.core.ctx.fillText("" + cljs.core.str.cljs$core$IFn$_invoke$arity$1(b) + " cents", sporktrum.core.width - 20, 60);
+};
 sporktrum.core.print_scale = function() {
   sporktrum.core.ctx.strokeStyle = "#8A8A8A";
   sporktrum.core.ctx.beginPath();
@@ -16444,7 +16456,8 @@ sporktrum.core.draw = function draw() {
   sporktrum.core.clear.call(null);
   sporktrum.core.draw_spectrum.call(null, b);
   sporktrum.core.draw_line_scale.call(null);
-  return sporktrum.core.print_scale.call(null);
+  sporktrum.core.print_scale.call(null);
+  return sporktrum.core.print_strongest_freq.call(null, b);
 };
 sporktrum.core.configure = function(a) {
   var b = new AudioContext;
