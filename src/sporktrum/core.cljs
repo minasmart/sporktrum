@@ -100,9 +100,9 @@
     (set! (.-fillStyle ctx) "#8A8A8A")
     (set! (.-textAlign ctx) "right")
     (set! (.-font ctx) "14px Helvetica, Arial")
-    (.fillText ctx (str (js/parseInt max-freq 10) "Hz") (- width 20) 20)
-    (.fillText ctx (str note octave) (- width 20) 40)
-    (.fillText ctx (str signed-cents " cents") (- width 20) 60)
+    (.fillText ctx (str (js/parseInt max-freq 10) "Hz") (- width 10) 20)
+    (.fillText ctx (str note octave) (- width 10) 40)
+    (.fillText ctx (str signed-cents " cents") (- width 10) 60)
     ))
 
 (defn print-scale
